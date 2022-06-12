@@ -1,4 +1,7 @@
 ;;;; package.lisp
 
 (defpackage #:sja
-  (:use #:cl))
+  (:use #:cl)
+  (:export
+   :str-trim
+   :str-split-trim))
