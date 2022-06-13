@@ -9,4 +9,6 @@
   :depends-on (#:alexandria #:cl-ppcre #:str #:uiop)
   :components ((:file "package")
                (:file "strings")
+               (:file "io")
+               (:file "dicts")
                (:file "sja")))
