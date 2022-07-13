@@ -5,7 +5,6 @@
 
 (defun io-readlines (file-path)
   (uiop:read-file-lines file-path))
-j
 
 (defun read-json (file-path)
   (let ((contents (io-read file-path)))
