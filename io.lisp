@@ -62,9 +62,9 @@
          (array (coerce bytes 'vector)))
     (funcall converter array len)))
 
-(defmethod read-one-int ((buffer bytes-buffer) &optional (sz 1) &key (signed t))
+(defmethod read-an-int ((buffer bytes-buffer) &optional (sz 1) &key (signed 'nil))
   (let ((bytes (get-bytes buffer sz))
-        (converter (if signed #'cl-intbytes:octets->int #'cl-intbytes:octets->uint)))
+        (converter (if signed  #'cl-intbytes:octets->int #'cl-intbytes:octets->uint)))
     (int-from-bytes bytes converter)))
 
 (defun 1-or-more (fn count)
@@ -75,28 +75,28 @@
           (push (funcall fn) many))
         (nreverse many))))
 
-(defmethod read-int ((buffer bytes-buffer) &optional (sz 1) &key (count 1) (signed '()))
+(defun read-int (buffer  &key (sz 1) (count 1) (signed 'nil))
   (labels ((read-one ()
-             (read-one-int buffer sz :signed signed)))
+             (read-an-int buffer sz :signed signed)))
     (1-or-more #'read-one count)))
 
 (defun u8 (buffer)
-  (read-int))
+  (read-int buffer))
 
 (defun s8 (buffer)
-  (read-int :signed t))
+  (read-int buffer  :signed 't))
 
 (defun u16 (buffer)
-  (read-int 2))
+  (read-int buffer :sz 2))
 
 (defun s16 (buffer)
-  (read-int 2 :signed t))
+  (read-int buffer :sz 2 :signed t))
 
 (defun u32 (buffer)
-  (read-int 4))
+  (read-int xuffer 4))
 
 (defun s32 (buffer)
-  (read-int 4 :signed t))
+  (read-int buffer 4 :signed t))
 
 
 
