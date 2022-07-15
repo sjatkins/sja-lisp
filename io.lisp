@@ -17,6 +17,9 @@
       (read-sequence contents stream)
       contents)))
 
+(defun file-byte-buffer (file-path)
+  (make-instance 'bytes-buffer :bytes (read-file-bytes file-path)))
+
 (defun binary-stream (file-path)
   (open file-path :direction :input :element-type '(unsigned-byte 8)))
 
@@ -28,7 +31,7 @@
                              
 (defgeneric get-bytes (buffer sz))
 (defgeneric peek-bytes (buffer sz))
-(defgeneric read-one-int (buffer &key))
+(defgeneric read-one-int (buffer &optional (sz 1)  &key (signed '())))
 (defgeneric read-string (buffer))
 
 (defmethod read-string ((buffer bytes-buffer))
@@ -44,7 +47,7 @@
     (nreverse buf)))
 
 (defmethod get-bytes ((buffer bytes-buffer) sz)
-  (let ((answer (peak-bytes buffer sz)))
+  (let ((answer (peek-bytes buffer sz)))
     (incf (pos buffer) sz)
     answer))
 
@@ -54,13 +57,47 @@
 (defun reset-buffer (buffer)
   (set-pos buffer 0))
 
-(defun int-from-bytes (bytes)
+(defun int-from-bytes (bytes converter)
   (let* ((len (length bytes))
-         (mult (mapcar (lambda (i) (ash 1 (* 8 i))) (alexandria:iota len))))
-    (apply #'+ (mapcar (lambda (a b) (* a b)) bytes mult))))
+         (array (coerce bytes 'vector)))
+    (funcall converter array len)))
 
-(defmethod read-one-int ((buffer bytes-buffer) &key (sz 1))
-  (let ((bytes (get-bytes buffer sz)))
-    (int-from-bytes bytes)))
+(defmethod read-one-int ((buffer bytes-buffer) &optional (sz 1) &key (signed t))
+  (let ((bytes (get-bytes buffer sz))
+        (converter (if signed #'cl-intbytes:octets->int #'cl-intbytes:octets->uint)))
+    (int-from-bytes bytes converter)))
+
+(defun 1-or-more (fn count)
+  (if (= count 1)
+      (funcall fn)
+      (let ((many '()))
+        (dotimes (i count)
+          (push (funcall fn) many))
+        (nreverse many))))
+
+(defmethod read-int ((buffer bytes-buffer) &optional (sz 1) &key (count 1) (signed '()))
+  (labels ((read-one ()
+             (read-one-int buffer sz :signed signed)))
+    (1-or-more #'read-one count)))
+
+(defun u8 (buffer)
+  (read-int))
+
+(defun s8 (buffer)
+  (read-int :signed t))
+
+(defun u16 (buffer)
+  (read-int 2))
+
+(defun s16 (buffer)
+  (read-int 2 :signed t))
+
+(defun u32 (buffer)
+  (read-int 4))
+
+(defun s32 (buffer)
+  (read-int 4 :signed t))
+
+
 
   
