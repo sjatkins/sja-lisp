@@ -10,6 +10,7 @@
   :components ((:file "package")
                (:file "strings")
                (:file "io")
+               (:file "lol")
                (:file "dicts")
                (:file "scanner")
                (:file "bytes")

@@ -31,7 +31,6 @@
                              
 (defgeneric get-bytes (buffer sz))
 (defgeneric peek-bytes (buffer sz))
-(defgeneric read-one-int (buffer &optional (sz 1)  &key (signed '())))
 (defgeneric read-string (buffer))
 
 (defmethod read-string ((buffer bytes-buffer))

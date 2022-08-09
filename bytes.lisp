@@ -13,8 +13,6 @@
             (lambda (a b)
               (* a b))
             mults bytes))))
-  
-
             
     
 (defun encode-int-little (sz val)
