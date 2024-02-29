@@ -6,7 +6,12 @@
   :license  "Specify license here"
   :version "0.0.1"
   :serial t
-  :depends-on (#:alexandria #:cl-ppcre #:str #:uiop #:fset)
+  :depends-on (#:alexandria #:cl-ppcre #:str #:uiop #:yason #:cl-intbytes)
   :components ((:file "package")
                (:file "strings")
+               (:file "io")
+               (:file "lol")
+               (:file "dicts")
+               (:file "scanner")
+               (:file "bytes")
                (:file "sja")))
