@@ -14,4 +14,6 @@
                (:file "dicts")
                (:file "scanner")
                (:file "bytes")
+	       (:file "utils")
+	       (:file "primes")
                (:file "sja")))

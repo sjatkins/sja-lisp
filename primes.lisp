@@ -1,3 +1,4 @@
+(in-package #:sja)
 
 (defmacro while (test &body body)
   `(do ()
