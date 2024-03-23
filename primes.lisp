@@ -1,18 +1,4 @@
-(in-package #:sja)
 
-(defmacro while (test &body body)
-  `(do ()
-       ((not ,test))
-     ,@body))
-
-
-(defun any (lst)
-  (dolist (l lst)
-    (if l (return-from any t))))
-
-(defun any-satisfies (lst test)
-  (dolist (l lst)
-    (if (funcall test l) (return-from any t))))
 
 (defun from-factors (factors)
   (apply #'* (mapcar
@@ -26,8 +12,8 @@
 (defmacro divides (n d)
   `(zerop (mod n d)))
 
-(defun next-prime (p)   ; of course only existing primes can be factors for check
-			   			   
+
+(defun next-prime (p)
   (let* ((answer (+ p
      (if (= (mod p 6) 5)
 	 2
@@ -49,6 +35,8 @@
 (defvar *primes* (make-adjustable-vector
 		  '(2 3 5 7 11 13 17 19 23)))
 
+(defun last-known-prime ()
+  (lastv *primes*))
 
 (defun lastv (v)
   (aref v (1- (length v))))
@@ -85,53 +73,50 @@
     (and (< pt (length vec))
 	 (= (aref vec pt) val))))
 
-(defun extend-if-needed (limit)
-  (if (< (lastv *primes*) limit)
-      (extend-primes-to limit)))
-
-(defun subseq-upto (vec val)
-  (let* ((pt (binsert-left vec val))
-	 (end (if (> (aref vec pt) val)
-		  pt
-		  (+ 1 pt))))
-    (subseq vec 0 end)))
-      
-      
-
 (defun primes-le (limit)
-  (extend-if-needed limit)
-  (coerce (subseq-upto *primes* limit) 'list))
+  (ensure-primes-upto limit)
+  (let ((pt (binsert-left *primes* limit)))
+    (coerce
+     (subseq
+      *primes*
+      0
+      (if (> (aref *primes* pt) limit)
+	  pt
+	  (+ 1 pt)))
+     'list)))
+  
+(defun is-prime (n)
+  (if (< n (lastv *primes*))
+      (return-from is-prime (binsearch *primes* n)))
 
-(defun none-satisfy (pred lst)
-  (dolist (l lst)
-    (if (funcall pred l)
-	(return-from not-any nil)))
+  (dolist (p (possible-factors n))
+      (if (zerop (mod n p))
+	  (return-from is-prime nil)))
   t)
 
-(defun possibly-prime (n)
-  (let ((m6 (mod n 6)))
-    (cond
-      ((< n 2) nil)
-      ((= n 2) t)
-      ((= n 3) t)
-      ((= m6 1) t)
-      ((= m6 5) t))))
-
-(defun divides (n)
-  (lambda (d) (zerop (mod n d))))
-
-(defun is-known-prime (n)
-  (and (< n (lastv *primes*)) (binsearch *primes* n)))
-
-(defun is-prime (n)
-  (if (possible-prime n)
-      (or
-       (is-known-prime n)
-       (none-satisfy (divides n) (possible-factors n)))))
+(defun fib ()
+  (let ((a 0) (b 0))
+    (lambda ()
+      (cond
+	((zerop a) (setf a 1))
+	((and
+	  (= a 1) (zerop b)) (setf b 2))
+	(t (let ((temp (+ a b)))
+	     (setf a b)
+	     (setf b temp)))))))
 
 (defun possible-factors (n)
   (let ((limit (floor (sqrt n))))
+    (ensure-primes-upto limit)
     (primes-le limit)))
+
+(defun largest-factor (n)
+  (let ((rev-factors (nreverse (possible-factors n))))
+    (dolist (p rev-factors)
+      (if (zerop (mod n p))
+	  (return-from largest-factor p)))
+    n))
+
 
 (defun full-factors (n)
   (let ((factors)
@@ -147,8 +132,8 @@
 
     
 (defun coerce-to-string (something)
-  (with-output-to-string (xx)
-			 (format xx "~a" something)))
+	   (with-output-to-string (xx)
+	     (format xx "~a" something)))
       
 (defun palindrome-p (seq)
   (let* ((working (coerce-to-string seq))

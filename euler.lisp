@@ -48,3 +48,11 @@
      ((val (funcall iter) (funcall iter)))
      ((not (funcall while-condition val limit)) (nreverse res))
       (push val res))))
+
+(defun euler2 ()
+  (let* ((raw (collect-iter-limit #'fib-iter 1000 #<=))
+	 (even (remove-if-not #'evenp raw)))
+    (apply #'sum even)))
+
+
+
